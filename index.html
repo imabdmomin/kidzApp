@@ -1,0 +1,1373 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ছোটদের জীবন পাঠ - মজার কুইজ</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Hind Siliguri for clean, kid-friendly Bengali typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Hind Siliguri', sans-serif;
+            background: linear-gradient(135deg, #FFDEE9 0%, #B5FFFC 50%, #FFF6B7 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+            user-select: none;
+        }
+
+        /* Custom Animations */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+        }
+        .animate-float {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.85); opacity: 0; }
+            70% { transform: scale(1.03); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .animate-pop {
+            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-8px); }
+            40%, 80% { transform: translateX(8px); }
+        }
+        .animate-shake {
+            animation: shake 0.4s ease-in-out;
+        }
+
+        @keyframes starPop {
+            0% { transform: scale(0) rotate(-30deg); opacity: 0; }
+            70% { transform: scale(1.25) rotate(10deg); opacity: 1; }
+            100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+        .star-animate {
+            animation: starPop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        /* 3D Toy-like Button Styling */
+        .btn-toy {
+            transition: all 0.15s ease;
+            box-shadow: 0 6px 0 rgba(0, 0, 0, 0.15);
+        }
+        .btn-toy:active:not(:disabled) {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 rgba(0, 0, 0, 0.15);
+        }
+
+        .option-card {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 5px 0 #cbd5e1;
+        }
+        .option-card:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 0 #94a3b8;
+        }
+        .option-card:active:not(:disabled) {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 #94a3b8;
+        }
+
+        /* Confetti Canvas */
+        #confetti-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #f472b6;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="text-slate-800 flex flex-col justify-between">
+
+    <!-- Confetti Canvas -->
+    <canvas id="confetti-canvas"></canvas>
+
+    <!-- Top Navigation / Audio Controls -->
+    <header class="w-full max-w-4xl mx-auto px-4 pt-4 pb-2 flex flex-wrap items-center justify-between gap-2 z-10">
+        <button onclick="goHome()" class="flex items-center gap-2 bg-white/90 hover:bg-white px-4 py-2 rounded-2xl shadow-md border-2 border-pink-200 transition cursor-pointer">
+            <span class="text-2xl">🌈</span>
+            <span class="font-bold text-lg sm:text-xl text-pink-600">ছোটদের জীবন পাঠ</span>
+        </button>
+
+        <div class="flex items-center gap-2">
+            <!-- Sound Toggle -->
+            <button id="btn-sound" onclick="toggleSound()" title="সাউন্ড অন/অফ" class="btn-toy flex items-center gap-1.5 bg-amber-400 hover:bg-amber-300 text-slate-900 font-bold px-3.5 py-2 rounded-2xl text-sm sm:text-base cursor-pointer">
+                <span id="icon-sound" class="text-lg">🔊</span>
+                <span class="hidden sm:inline">সাউন্ড</span>
+            </button>
+
+            <!-- Voice Toggle -->
+            <button id="btn-voice" onclick="toggleVoice()" title="বাংলা ভয়েস অন/অফ" class="btn-toy flex items-center gap-1.5 bg-sky-400 hover:bg-sky-300 text-slate-900 font-bold px-3.5 py-2 rounded-2xl text-sm sm:text-base cursor-pointer">
+                <span id="icon-voice" class="text-lg">🗣️</span>
+                <span class="hidden sm:inline">ভয়েস</span>
+            </button>
+
+            <!-- Parents Guide Button -->
+            <button onclick="openParentsModal()" class="btn-toy flex items-center gap-1.5 bg-purple-500 hover:bg-purple-400 text-white font-bold px-3.5 py-2 rounded-2xl text-sm sm:text-base cursor-pointer">
+                <span class="text-lg">👨‍👩‍👧</span>
+                <span>অভিভাবক টিপস</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="w-full max-w-4xl mx-auto px-4 py-4 flex-grow flex flex-col justify-center">
+
+        <!-- ==================== 1. HOME / CATEGORY SELECTION VIEW ==================== -->
+        <section id="view-home" class="animate-pop space-y-6">
+            <!-- Hero Banner -->
+            <div class="bg-white/90 backdrop-blur-md rounded-3xl p-6 sm:p-8 shadow-xl border-4 border-white text-center relative overflow-hidden">
+                <div class="text-5xl sm:text-6xl mb-3 animate-float">🎒🦁🌟</div>
+                <h1 class="text-2xl sm:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 mb-2">
+                    এসো খেলতে খেলতে শিখি!
+                </h1>
+                <p class="text-base sm:text-lg text-slate-600 max-w-2xl mx-auto font-medium">
+                    স্কুলে নতুন বন্ধু তৈরি, নিজেকে নিরাপদ রাখা এবং ভালো অভ্যাস শেখার মজার কুইজ। নিচের যেকোনো একটি বিভাগ বেছে নিয়ে খেলা শুরু করো!
+                </p>
+            </div>
+
+            <!-- 3 Main Categories Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5">
+                <!-- Category 1 -->
+                <button onclick="startQuiz('cat1')" class="btn-toy group bg-gradient-to-br from-pink-400 to-rose-500 text-white rounded-3xl p-6 text-left flex flex-col justify-between border-4 border-white/60 cursor-pointer">
+                    <div>
+                        <div class="w-14 h-14 bg-white/25 rounded-2xl flex items-center justify-center text-3xl mb-4 group-hover:scale-110 transition">
+                            🤝
+                        </div>
+                        <span class="inline-block bg-white/25 text-xs font-bold px-3 py-1 rounded-full mb-2">১০টি প্রশ্ন</span>
+                        <h2 class="text-xl sm:text-2xl font-bold leading-snug mb-2">বন্ধুত্ব ও দলীয় চাপ সামলানো</h2>
+                        <p class="text-pink-100 text-sm">ভালো বন্ধু চেনা ও ভুল কাজে 'না' বলার কৌশল।</p>
+                    </div>
+                    <div class="mt-5 flex items-center justify-between bg-white text-rose-600 font-bold px-4 py-2.5 rounded-2xl">
+                        <span>খেলা শুরু করো</span>
+                        <span class="text-xl">▶️</span>
+                    </div>
+                </button>
+
+                <!-- Category 2 -->
+                <button onclick="startQuiz('cat2')" class="btn-toy group bg-gradient-to-br from-emerald-400 to-teal-600 text-white rounded-3xl p-6 text-left flex flex-col justify-between border-4 border-white/60 cursor-pointer">
+                    <div>
+                        <div class="w-14 h-14 bg-white/25 rounded-2xl flex items-center justify-center text-3xl mb-4 group-hover:scale-110 transition">
+                            🛡️
+                        </div>
+                        <span class="inline-block bg-white/25 text-xs font-bold px-3 py-1 rounded-full mb-2">১০টি প্রশ্ন</span>
+                        <h2 class="text-xl sm:text-2xl font-bold leading-snug mb-2">নিজের নিরাপত্তা ও আত্মরক্ষা</h2>
+                        <p class="text-emerald-100 text-sm">বিপদে নিজেকে সুরক্ষিত রাখা ও বড়দের সাহায্য নেওয়া।</p>
+                    </div>
+                    <div class="mt-5 flex items-center justify-between bg-white text-teal-700 font-bold px-4 py-2.5 rounded-2xl">
+                        <span>খেলা শুরু করো</span>
+                        <span class="text-xl">▶️</span>
+                    </div>
+                </button>
+
+                <!-- Category 3 -->
+                <button onclick="startQuiz('cat3')" class="btn-toy group bg-gradient-to-br from-amber-400 to-orange-500 text-white rounded-3xl p-6 text-left flex flex-col justify-between border-4 border-white/60 cursor-pointer">
+                    <div>
+                        <div class="w-14 h-14 bg-white/25 rounded-2xl flex items-center justify-center text-3xl mb-4 group-hover:scale-110 transition">
+                            🌟
+                        </div>
+                        <span class="inline-block bg-white/25 text-xs font-bold px-3 py-1 rounded-full mb-2">১০টি প্রশ্ন</span>
+                        <h2 class="text-xl sm:text-2xl font-bold leading-snug mb-2">আত্মবিশ্বাস ও ভালো অভ্যাস</h2>
+                        <p class="text-amber-50 text-sm">সাহসী হওয়া, সত্য বলা ও সবাইকে সাহায্য করা।</p>
+                    </div>
+                    <div class="mt-5 flex items-center justify-between bg-white text-orange-600 font-bold px-4 py-2.5 rounded-2xl">
+                        <span>খেলা শুরু করো</span>
+                        <span class="text-xl">▶️</span>
+                    </div>
+                </button>
+            </div>
+
+            <!-- Full Quiz Mode Section -->
+            <div class="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-3xl p-6 text-white shadow-xl border-4 border-white/70">
+                <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                    <div class="text-center md:text-left">
+                        <div class="flex items-center justify-center md:justify-start gap-2 mb-1">
+                            <span class="text-3xl">🏆</span>
+                            <h3 class="text-xl sm:text-2xl font-bold">সবগুলো মিলিয়ে মেগা কুইজ খেলো!</h3>
+                        </div>
+                        <p class="text-indigo-100 text-sm sm:text-base">তিনটি বিভাগ থেকে মিলিয়ে কয়টি প্রশ্ন খেলতে চাও বেছে নাও:</p>
+                    </div>
+                    <div class="flex flex-wrap justify-center gap-3">
+                        <button onclick="startQuiz('mix10')" class="btn-toy bg-yellow-300 hover:bg-yellow-200 text-slate-900 font-bold px-4 py-3 rounded-2xl text-base cursor-pointer">
+                            🎲 ১০টি প্রশ্ন
+                        </button>
+                        <button onclick="startQuiz('mix15')" class="btn-toy bg-cyan-300 hover:bg-cyan-200 text-slate-900 font-bold px-4 py-3 rounded-2xl text-base cursor-pointer">
+                            🚀 ১৫টি প্রশ্ন
+                        </button>
+                        <button onclick="startQuiz('all30')" class="btn-toy bg-white hover:bg-pink-50 text-purple-700 font-bold px-5 py-3 rounded-2xl text-base cursor-pointer">
+                            👑 সবগুলো (৩০টি)
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== 2. QUIZ GAMEPLAY VIEW ==================== -->
+        <section id="view-quiz" class="hidden animate-pop space-y-5">
+            <!-- Top Progress & Score Bar -->
+            <div class="bg-white/95 rounded-3xl p-4 sm:p-5 shadow-lg border-4 border-white">
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                    <span id="quiz-category-badge" class="bg-purple-100 text-purple-700 font-bold px-3.5 py-1.5 rounded-xl text-sm sm:text-base">
+                        🌸 বন্ধুত্ব ও দলীয় চাপ
+                    </span>
+                    <div class="flex items-center gap-3">
+                        <span class="bg-amber-100 text-amber-800 font-bold px-3.5 py-1.5 rounded-xl text-sm sm:text-base">
+                            ⭐ স্কোর: <span id="current-score">0</span>
+                        </span>
+                        <span class="bg-sky-100 text-sky-800 font-bold px-3.5 py-1.5 rounded-xl text-sm sm:text-base">
+                            প্রশ্ন: <span id="question-counter">1/10</span>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Progress Bar -->
+                <div class="w-full h-4 bg-slate-200 rounded-full overflow-hidden p-0.5">
+                    <div id="progress-bar" class="h-full bg-gradient-to-r from-green-400 via-emerald-500 to-teal-500 rounded-full transition-all duration-500" style="width: 10%;"></div>
+                </div>
+            </div>
+
+            <!-- Question Card -->
+            <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-xl border-4 border-indigo-100 relative">
+                <div class="flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
+                    <!-- Big Emoji Avatar -->
+                    <div id="question-emoji" class="w-20 h-20 sm:w-24 sm:h-24 shrink-0 bg-gradient-to-br from-amber-100 to-pink-100 rounded-3xl flex items-center justify-center text-5xl sm:text-6xl shadow-inner border-2 border-amber-200 animate-float">
+                        🤔
+                    </div>
+                    
+                    <div class="flex-grow text-center sm:text-left">
+                        <div class="flex items-center justify-center sm:justify-start gap-2 mb-2">
+                            <span class="text-xs font-bold uppercase tracking-wider text-indigo-500 bg-indigo-50 px-3 py-1 rounded-full">
+                                ভেবে উত্তর দাও
+                            </span>
+                            <!-- Speak Question Button -->
+                            <button onclick="speakCurrentQuestion()" title="প্রশ্নটি আবার শোনো" class="bg-sky-100 hover:bg-sky-200 text-sky-700 p-2 rounded-full transition cursor-pointer flex items-center gap-1 text-xs font-bold px-3">
+                                <span>🔊</span>
+                                <span>শোনো</span>
+                            </button>
+                        </div>
+                        <h2 id="question-text" class="text-xl sm:text-2xl md:text-3xl font-bold text-slate-800 leading-relaxed">
+                            প্রশ্ন লোড হচ্ছে...
+                        </h2>
+                    </div>
+                </div>
+
+                <!-- Options Container -->
+                <div id="options-container" class="grid grid-cols-1 gap-3.5 mt-6 sm:mt-8">
+                    <!-- Options injected by JS -->
+                </div>
+
+                <!-- Feedback & Learning Card (Hidden until answered) -->
+                <div id="feedback-box" class="hidden mt-6 rounded-2xl p-5 border-2 animate-pop">
+                    <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <div class="flex items-start gap-3 text-center sm:text-left">
+                            <span id="feedback-emoji" class="text-4xl shrink-0">🎉</span>
+                            <div>
+                                <h3 id="feedback-title" class="text-xl sm:text-2xl font-bold mb-1">সাবাশ! দারুণ বলেছো!</h3>
+                                <p id="feedback-message" class="text-base sm:text-lg font-medium opacity-90">
+                                    সঠিক উত্তরটি মনে রেখো।
+                                </p>
+                            </div>
+                        </div>
+                        <button id="btn-next" onclick="nextQuestion()" class="btn-toy shrink-0 w-full sm:w-auto bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-lg px-7 py-3.5 rounded-2xl flex items-center justify-center gap-2 cursor-pointer">
+                            <span>পরবর্তী প্রশ্ন</span>
+                            <span>➡️</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== 3. RESULTS & STAR RATING VIEW ==================== -->
+        <section id="view-result" class="hidden animate-pop">
+            <div class="bg-white/95 rounded-3xl p-6 sm:p-10 shadow-2xl border-4 border-yellow-300 text-center max-w-2xl mx-auto relative overflow-hidden">
+                <!-- Trophy / Badge -->
+                <div id="result-badge-emoji" class="text-7xl sm:text-8xl mb-3 animate-float">🏆</div>
+                
+                <span id="result-badge-title" class="inline-block bg-gradient-to-r from-amber-400 to-orange-500 text-white font-bold px-5 py-1.5 rounded-full text-base sm:text-lg shadow-md mb-3">
+                    সুপার হিরো চ্যাম্পিয়ন!
+                </span>
+
+                <h2 id="result-heading" class="text-2xl sm:text-4xl font-bold text-slate-800 mb-2">
+                    অভিনন্দন সোনা!
+                </h2>
+                <p id="result-subtext" class="text-slate-600 text-base sm:text-lg mb-6">
+                    তুমি দারুণ খেলেছো এবং অনেক ভালো বিষয় শিখেছো!
+                </p>
+
+                <!-- 5 Stars Rating Display -->
+                <div id="stars-container" class="flex items-center justify-center gap-2 sm:gap-3 text-4xl sm:text-6xl my-6 bg-amber-50 py-4 px-6 rounded-3xl border-2 border-amber-200 inline-flex">
+                    <span>⭐</span><span>⭐</span><span>⭐</span><span>⭐</span><span>⭐</span>
+                </div>
+
+                <!-- Score Summary Boxes -->
+                <div class="grid grid-cols-3 gap-3 sm:gap-4 my-6">
+                    <div class="bg-indigo-50 border-2 border-indigo-200 rounded-2xl p-3 sm:p-4">
+                        <div class="text-xs sm:text-sm font-bold text-indigo-500">মোট প্রশ্ন</div>
+                        <div id="res-total" class="text-2xl sm:text-3xl font-bold text-indigo-800">১০</div>
+                    </div>
+                    <div class="bg-emerald-50 border-2 border-emerald-200 rounded-2xl p-3 sm:p-4">
+                        <div class="text-xs sm:text-sm font-bold text-emerald-600">সঠিক উত্তর</div>
+                        <div id="res-correct" class="text-2xl sm:text-3xl font-bold text-emerald-700">৮</div>
+                    </div>
+                    <div class="bg-amber-50 border-2 border-amber-200 rounded-2xl p-3 sm:p-4">
+                        <div class="text-xs sm:text-sm font-bold text-amber-600">মোট পয়েন্ট</div>
+                        <div id="res-points" class="text-2xl sm:text-3xl font-bold text-amber-700">৮০</div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mt-8">
+                    <button onclick="replayQuiz()" class="btn-toy w-full sm:w-auto bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-bold text-lg px-8 py-4 rounded-2xl flex items-center justify-center gap-2 cursor-pointer">
+                        <span>🔄</span>
+                        <span>আবার খেলো (Replay)</span>
+                    </button>
+                    <button onclick="goHome()" class="btn-toy w-full sm:w-auto bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-400 hover:to-purple-500 text-white font-bold text-lg px-8 py-4 rounded-2xl flex items-center justify-center gap-2 cursor-pointer">
+                        <span>🏠</span>
+                        <span>অন্য বিভাগ বেছে নাও</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="w-full text-center py-4 px-4 text-slate-600 text-sm font-medium">
+        <p>🌼 প্রতিদিন ৫-১০ মিনিট গল্পের ছলে সন্তানকে এই প্রশ্নগুলো করুন এবং আত্মবিশ্বাসী করে গড়ে তুলুন। ❤️</p>
+    </footer>
+
+    <!-- ==================== PARENTS GUIDE MODAL ==================== -->
+    <div id="parents-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-2xl w-full max-h-[88vh] flex flex-col shadow-2xl border-4 border-purple-300 animate-pop overflow-hidden">
+            <!-- Modal Header -->
+            <div class="bg-gradient-to-r from-purple-600 to-pink-500 text-white p-5 flex items-center justify-between">
+                <div class="flex items-center gap-2.5">
+                    <span class="text-3xl">❤️</span>
+                    <h3 class="text-xl sm:text-2xl font-bold">অভিভাবকদের জন্য ৫টি জরুরি টিপস</h3>
+                </div>
+                <button onclick="closeParentsModal()" class="bg-white/20 hover:bg-white/30 text-white w-10 h-10 rounded-full font-bold text-xl flex items-center justify-center cursor-pointer">
+                    ✕
+                </button>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="p-6 overflow-y-auto space-y-4 text-slate-700">
+                <p class="text-base font-semibold text-purple-800 bg-purple-50 p-3.5 rounded-2xl border border-purple-200">
+                    শুধু প্রশ্ন করলেই হবে না, আপনার সন্তানকে প্রতিদিন গল্পের ছলে নিচের ৫টি বিষয়ও শেখান:
+                </p>
+
+                <div class="space-y-3">
+                    <div class="bg-pink-50 p-4 rounded-2xl border border-pink-200 flex gap-3">
+                        <span class="text-2xl">🛑</span>
+                        <div>
+                            <h4 class="font-bold text-pink-700 text-lg">১. 'না' বলতে শেখান:</h4>
+                            <p class="text-sm sm:text-base">সন্তানকে নিজের ইচ্ছার বিরুদ্ধে কিছু করতে 'না' বলার সাহস দিন।</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-sky-50 p-4 rounded-2xl border border-sky-200 flex gap-3">
+                        <span class="text-2xl">🛡️</span>
+                        <div>
+                            <h4 class="font-bold text-sky-700 text-lg">২. নিজের শরীর সম্পর্কে সচেতন করুন:</h4>
+                            <p class="text-sm sm:text-base">ব্যক্তিগত অঙ্গ, নিরাপদ ও অনিরাপদ স্পর্শ এবং অস্বস্তি হলে কী করতে হবে, বয়স অনুযায়ী বোঝান।</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-emerald-50 p-4 rounded-2xl border border-emerald-200 flex gap-3">
+                        <span class="text-2xl">🆘</span>
+                        <div>
+                            <h4 class="font-bold text-emerald-700 text-lg">৩. বিপদে সাহায্য চাইতে শেখান:</h4>
+                            <p class="text-sm sm:text-base">শিক্ষক, মা-বাবা ও বিশ্বস্ত বড় মানুষের কাছে কীভাবে সাহায্য চাইতে হয়, তা অভিনয়ের মাধ্যমে অনুশীলন করান।</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-amber-50 p-4 rounded-2xl border border-amber-200 flex gap-3">
+                        <span class="text-2xl">🗣️</span>
+                        <div>
+                            <h4 class="font-bold text-amber-700 text-lg">৪. সত্য বলার পরিবেশ তৈরি করুন:</h4>
+                            <p class="text-sm sm:text-base">সন্তান যেন কোনো ভুল করলেও বকা খাওয়ার ভয় না পেয়ে আপনাকে সব সত্যি কথা বলতে পারে।</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-indigo-50 p-4 rounded-2xl border border-indigo-200 flex gap-3">
+                        <span class="text-2xl">🤝</span>
+                        <div>
+                            <h4 class="font-bold text-indigo-700 text-lg">৫. ভালো বন্ধু চিনতে শেখান:</h4>
+                            <p class="text-sm sm:text-base">যে সম্মান করে, সাহায্য করে এবং জোর করে কিছু করায় না, সেই প্রকৃত ভালো বন্ধু।</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-yellow-50 border-2 border-yellow-300 p-4 rounded-2xl text-center font-semibold text-slate-800">
+                    🌼 মনে রাখবেন: সন্তানকে শুধু ভালো ছাত্রছাত্রী বানানোই আমাদের দায়িত্ব নয়; তাকে আত্মবিশ্বাসী, সাহসী ও নিরাপদ মানুষ হিসেবে গড়ে তোলাও জরুরি।
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="p-4 bg-slate-50 border-t flex justify-end">
+                <button onclick="closeParentsModal()" class="btn-toy bg-purple-600 hover:bg-purple-500 text-white font-bold px-6 py-2.5 rounded-2xl cursor-pointer">
+                    বুঝেছি, ধন্যবাদ! 👍
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // =========================================================================
+        // 1. COMPLETE 30 QUESTIONS DATABASE (3 CATEGORIES x 10 QUESTIONS)
+        // =========================================================================
+        const quizData = [
+            // --- ক্যাটাগরি ১: বন্ধুত্ব ও দলীয় চাপ সামলানো (প্রশ্ন ১-১০) ---
+            {
+                id: 1,
+                category: 'cat1',
+                categoryName: '🌸 বন্ধুত্ব ও দলীয় চাপ সামলানো',
+                emoji: '🙅‍♂️',
+                question: 'তোমার কোনো বন্ধু যদি তোমাকে খারাপ কিছু করতে বলে, তুমি কী করবে?',
+                options: [
+                    { text: 'আমি বলব, এটা ভালো কাজ নয়। আমি করব না।', isCorrect: true, icon: '🛡️' },
+                    { text: 'বন্ধু রাগ করবে ভেবে কাজটি করে ফেলব।', isCorrect: false, icon: '😟' },
+                    { text: 'চুপচাপ তার কথা শুনে খারাপ কাজটি করব।', isCorrect: false, icon: '🙈' }
+                ],
+                tip: 'প্রকৃত বন্ধু কখনো খারাপ কাজ করতে বলে না। সাহস করে না বলাই বুদ্ধিমানের কাজ!'
+            },
+            {
+                id: 2,
+                category: 'cat1',
+                categoryName: '🌸 বন্ধুত্ব ও দলীয় চাপ সামলানো',
+                emoji: '🏫',
+                question: 'ক্লাসের সবাই যদি কোনো ভুল কাজ করে, তুমিও কি করবে?',
+                options: [
+                    { text: 'হ্যাঁ, সবাই যেহেতু করছে আমিও করব।', isCorrect: false, icon: '👥' },
+                    { text: 'না। সবাই করলেও ভুল কাজ করা ঠিক নয়।', isCorrect: true, icon: '⭐' },
+                    { text: 'শিক্ষক না দেখলে আমিও করব।', isCorrect: false, icon: '👀' }
+                ],
+                tip: 'ভুল কাজ সবাই করলেও তা ভুলই থাকে। সব সময় সঠিক পথে চলবে।'
+            },
+            {
+                id: 3,
+                category: 'cat1',
+                categoryName: '🌸 বন্ধুত্ব ও দলীয় চাপ সামলানো',
+                emoji: '🤝',
+                question: 'কেউ যদি বলে, তুমি আমার বন্ধু হলে এটা করতেই হবে, তখন কী বলবে?',
+                options: [
+                    { text: 'বন্ধুত্ব রাখার জন্য তার সব কথা শুনব।', isCorrect: false, icon: '😞' },
+                    { text: 'ভালো বন্ধু কখনো জোর করে কিছু করায় না।', isCorrect: true, icon: '💖' },
+                    { text: 'ভয় পেয়ে তার কথা মেনে নেব।', isCorrect: false, icon: '😨' }
+                ],
+                tip: 'ভালো বন্ধু একে অপরকে সম্মান করে, কখনো জোর করে কিছু করায় না।'
+            },
+            {
+                id: 4,
+                category: 'cat1',
+                categoryName: '🌸 বন্ধুত্ব ও দলীয় চাপ সামলানো',
+                emoji: '🍱',
+                question: 'কোনো বন্ধু তোমার টিফিন বা খেলনা জোর করে নিতে চাইলে কী করবে?',
+                options: [
+                    { text: 'কান্নাকাটি করব কিন্তু কিছু বলব না।', isCorrect: false, icon: '😭' },
+                    { text: 'আমি তাকে মারধর করে খেলনা ফেরত নেব।', isCorrect: false, icon: '😠' },
+                    { text: 'আমি তাকে সুন্দরভাবে না বলব এবং প্রয়োজন হলে শিক্ষককে জানাব।', isCorrect: true, icon: '👩‍🏫' }
+                ],
+                tip: 'নিজের জিনিসের অধিকার রক্ষা করতে শান্তভাবে না বলবে এবং শিক্ষকের সাহায্য নেবে।'
+            },
+            {
+                id: 5,
+                category: 'cat1',
+                categoryName: '🌸 বন্ধুত্ব ও দলীয় চাপ সামলানো',
+                emoji: '🤗',
+                question: 'বন্ধুরা যদি কোনো শিশুকে নিয়ে হাসাহাসি করে, তুমি কী করবে?',
+                options: [
+                    { text: 'আমি তাদের সঙ্গে হাসব না। বরং তাকে সাহায্য করব।', isCorrect: true, icon: '🦸' },
+                    { text: 'আমিও সবার সাথে মিলে তাকে নিয়ে হাসব।', isCorrect: false, icon: '😂' },
+                    { text: 'দূরে দাঁড়িয়ে মজা দেখব।', isCorrect: false, icon: '🧍' }
+                ],
+                tip: 'কাউকে নিয়ে হাসাহাসি করা ঠিক নয়। বিপদে বা মন খারাপে পাশে দাঁড়ানোই প্রকৃত মহত্ত্ব।'
+            },
+            {
+                id: 6,
+                category: 'cat1',
+                categoryName: '🌸 বন্ধুত্ব ও দলীয় চাপ সামলানো',
+                emoji: '😊',
+                question: 'কেউ তোমার চেহারা বা পোশাক নিয়ে মজা করলে কী করবে?',
+                options: [
+                    { text: 'মন খারাপ করে স্কুলে যাওয়া বন্ধ করে দেব।', isCorrect: false, icon: '🏠' },
+                    { text: 'আমি বলব, কাউকে নিয়ে মজা করা ঠিক নয়। বেশি বিরক্ত করলে শিক্ষককে জানাব।', isCorrect: true, icon: '🗣️' },
+                    { text: 'আমিও তাকে নিয়ে পাল্টা মজা করব।', isCorrect: false, icon: '😜' }
+                ],
+                tip: 'প্রত্যেক মানুষই সুন্দর। কেউ বিরক্ত করলে আত্মবিশ্বাসের সাথে প্রতিবাদ করবে এবং শিক্ষককে জানাবে।'
+            },
+            {
+                id: 7,
+                category: 'cat1',
+                categoryName: '🌸 বন্ধুত্ব ও দলীয় চাপ সামলানো',
+                emoji: '⚽',
+                question: 'কোনো বন্ধু যদি বলে, তুমি আমাদের সঙ্গে খেলতে পারবে না, তখন কী করবে?',
+                options: [
+                    { text: 'আমি মন খারাপ করব না। অন্য বন্ধুদের সঙ্গে খেলব।', isCorrect: true, icon: '🎈' },
+                    { text: 'তাদের খেলা নষ্ট করে দেব।', isCorrect: false, icon: '💢' },
+                    { text: 'এক কোণায় বসে কাঁদতে থাকব।', isCorrect: false, icon: '😢' }
+                ],
+                tip: 'সবাই সব সময় একসাথে নাও খেলতে পারে। মন খারাপ না করে অন্য ভালো বন্ধুদের সাথে খেলবে।'
+            },
+            {
+                id: 8,
+                category: 'cat1',
+                categoryName: '🌸 বন্ধুত্ব ও দলীয় চাপ সামলানো',
+                emoji: '🍭',
+                question: 'বন্ধুরা যদি এমন খাবার খেতে দেয়, যা মা-বাবা নিষেধ করেছেন, তখন কী করবে?',
+                options: [
+                    { text: 'মা-বাবা তো দেখতে পাচ্ছেন না, তাই খেয়ে নেব।', isCorrect: false, icon: '😋' },
+                    { text: 'আমি খাব না। আগে মা-বাবার অনুমতি নেব।', isCorrect: true, icon: '👨‍👩‍👧' },
+                    { text: 'বন্ধুদের খুশি করতে একটুখানি খাব।', isCorrect: false, icon: '🤏' }
+                ],
+                tip: 'মা-বাবা আমাদের ভালোর জন্যই কিছু খাবার নিষেধ করেন। তাঁদের কথা মেনে চলাই নিরাপদ।'
+            },
+            {
+                id: 9,
+                category: 'cat1',
+                categoryName: '🌸 বন্ধুত্ব ও দলীয় চাপ সামলানো',
+                emoji: '✨',
+                question: 'কোনো বন্ধু যদি তোমাকে মিথ্যা বলতে বলে, তখন কী করবে?',
+                options: [
+                    { text: 'বন্ধুকে বাঁচাতে মিথ্যা কথা বলব।', isCorrect: false, icon: '🤥' },
+                    { text: 'আমি মিথ্যা বলব না। সব সময় সত্য কথা বলব।', isCorrect: true, icon: '🌟' },
+                    { text: 'কিছু না বলে পালিয়ে যাব।', isCorrect: false, icon: '🏃' }
+                ],
+                tip: 'সত্যবাদীকে সবাই ভালোবাসে এবং বিশ্বাস করে। কখনো মিথ্যা বলবে না।'
+            },
+            {
+                id: 10,
+                category: 'cat1',
+                categoryName: '🌸 বন্ধুত্ব ও দলীয় চাপ সামলানো',
+                emoji: '🎠',
+                question: 'কোনো বন্ধু যদি অন্য কাউকে খেলায় নিতে নিষেধ করে, তুমি কী করবে?',
+                options: [
+                    { text: 'বন্ধুর কথা শুনে তাকে খেলা থেকে বাদ দেব।', isCorrect: false, icon: '🚫' },
+                    { text: 'আমি সবাইকে নিয়ে খেলতে চাইব। কাউকে ছোট করব না।', isCorrect: true, icon: '🌈' },
+                    { text: 'তাকে চলে যেতে বলব।', isCorrect: false, icon: '👋' }
+                ],
+                tip: 'সবাইকে নিয়ে মিলেমিশে খেললে আনন্দ আরও বেড়ে যায়!'
+            },
+
+            // --- ক্যাটাগরি ২: নিজের নিরাপত্তা ও আত্মরক্ষা (প্রশ্ন ১১-২০) ---
+            {
+                id: 11,
+                category: 'cat2',
+                categoryName: '🛡️ নিজের নিরাপত্তা ও আত্মরক্ষা',
+                emoji: '✋',
+                question: 'কেউ যদি তোমাকে ধাক্কা দেয় বা মারে, তখন কী করবে?',
+                options: [
+                    { text: 'আমি তাকে থামতে বলব এবং শিক্ষক বা মা-বাবাকে জানাব।', isCorrect: true, icon: '🛑' },
+                    { text: 'ভয় পেয়ে চুপচাপ মার সহ্য করব।', isCorrect: false, icon: '😣' },
+                    { text: 'কাউকে কিছু না বলে লুকিয়ে থাকব।', isCorrect: false, icon: '🫣' }
+                ],
+                tip: 'কাউকে আঘাত করার অধিকার কারো নেই। সাথে সাথে থামতে বলবে এবং বড়দের জানাবে।'
+            },
+            {
+                id: 12,
+                category: 'cat2',
+                categoryName: '🛡️ নিজের নিরাপত্তা ও আত্মরক্ষা',
+                emoji: '🚨',
+                question: 'কেউ যদি তোমার ব্যক্তিগত অঙ্গ দেখতে বা স্পর্শ করতে চায়, তখন কী করবে?',
+                options: [
+                    { text: 'লজ্জায় কাউকে কিছু বলব না।', isCorrect: false, icon: '😶' },
+                    { text: 'আমি জোরে না বলব, সেখান থেকে সরে যাব এবং বিশ্বস্ত বড় কাউকে জানাব।', isCorrect: true, icon: '📢' },
+                    { text: 'সে যা বলছে চুপচাপ শুনব।', isCorrect: false, icon: '😔' }
+                ],
+                tip: 'তোমার শরীর শুধুই তোমার। কেউ অনিরাপদ স্পর্শ করতে চাইলে জোরে না বলবে এবং মা-বাবাকে জানাবে।'
+            },
+            {
+                id: 13,
+                category: 'cat2',
+                categoryName: '🛡️ নিজের নিরাপত্তা ও আত্মরক্ষা',
+                emoji: '🛡️',
+                question: 'কেউ যদি তোমাকে তার ব্যক্তিগত অঙ্গ দেখাতে বলে, তখন কী করবে?',
+                options: [
+                    { text: 'আমি কখনো দেখাব না। সঙ্গে সঙ্গে মা-বাবা বা শিক্ষককে বলব।', isCorrect: true, icon: '👨‍👩‍👧' },
+                    { text: 'সে বড় মানুষ বলে তার কথা শুনব।', isCorrect: false, icon: '😨' },
+                    { text: 'চুপ করে থাকব।', isCorrect: false, icon: '🤐' }
+                ],
+                tip: 'এমন কথা শুনলে কখনোই ভয় পাবে না, দ্রুত সেখান থেকে সরে গিয়ে মা-বাবা বা শিক্ষককে জানাবে।'
+            },
+            {
+                id: 14,
+                category: 'cat2',
+                categoryName: '🛡️ নিজের নিরাপত্তা ও আত্মরক্ষা',
+                emoji: '💬',
+                question: 'কেউ যদি বলে, এই কথাটা মা-বাবাকে বলা যাবে না, তখন কী করবে?',
+                options: [
+                    { text: 'কথাটা গোপন রাখব, মা-বাবাকে বলব না।', isCorrect: false, icon: '🤫' },
+                    { text: 'যে কথা আমাকে ভয় পাইয়ে দেয় বা অস্বস্তিতে ফেলে, তা অবশ্যই মা-বাবাকে বলব।', isCorrect: true, icon: '❤️' },
+                    { text: 'শুধু বন্ধুদের বলব।', isCorrect: false, icon: '🗣️' }
+                ],
+                tip: 'মা-বাবার কাছে কোনো গোপন বা ভয়ের কথা লুকানো উচিত নয়। তাঁরা সব সময় তোমাকে রক্ষা করবেন।'
+            },
+            {
+                id: 15,
+                category: 'cat2',
+                categoryName: '🛡️ নিজের নিরাপত্তা ও আত্মরক্ষা',
+                emoji: '🦁',
+                question: 'কেউ যদি তোমাকে ভয় দেখায়, তখন কী করবে?',
+                options: [
+                    { text: 'ভয় পেয়ে তার সব কথা মেনে নেব।', isCorrect: false, icon: '😰' },
+                    { text: 'ভয় পাব না। নিরাপদ জায়গায় গিয়ে বিশ্বস্ত বড় মানুষের সাহায্য নেব।', isCorrect: true, icon: '🏫' },
+                    { text: 'একা একা অন্ধকার ঘরে বসে থাকব।', isCorrect: false, icon: '🌑' }
+                ],
+                tip: 'ভয় পেলে বিপদ বাড়ে। সাহস করে নিরাপদ স্থানে যাবে এবং বিশ্বস্ত বড়দের সাহায্য নেবে।'
+            },
+            {
+                id: 16,
+                category: 'cat2',
+                categoryName: '🛡️ নিজের নিরাপত্তা ও আত্মরক্ষা',
+                emoji: '👮‍♂️',
+                question: 'স্কুলে হারিয়ে গেলে বা পরিচিত কাউকে খুঁজে না পেলে কী করবে?',
+                options: [
+                    { text: 'একাই রাস্তায় হাঁটতে হাঁটতে বাসার দিকে যাব।', isCorrect: false, icon: '🛣️' },
+                    { text: 'কোনো অচেনা লোকের গাড়িতে উঠে পড়ব।', isCorrect: false, icon: '🚗' },
+                    { text: 'আমি স্কুলের শিক্ষক বা নিরাপত্তাকর্মীর কাছে সাহায্য চাইব। অপরিচিত কারও সঙ্গে চলে যাব না।', isCorrect: true, icon: '🏫' }
+                ],
+                tip: 'স্কুলের ভেতরে থাকলে শিক্ষক বা গেটের নিরাপত্তাকর্মীই তোমার সবচেয়ে নিরাপদ আশ্রয়।'
+            },
+            {
+                id: 17,
+                category: 'cat2',
+                categoryName: '🛡️ নিজের নিরাপত্তা ও আত্মরক্ষা',
+                emoji: '🍫',
+                question: 'কোনো অপরিচিত ব্যক্তি যদি চকলেট বা খেলনা দিয়ে ডাকে, তখন কী করবে?',
+                options: [
+                    { text: 'চকলেট নেওয়ার জন্য তার সাথে যাব।', isCorrect: false, icon: '🍬' },
+                    { text: 'আমি তার সঙ্গে কোথাও যাব না। মা-বাবাকে জানাব।', isCorrect: true, icon: '🚫' },
+                    { text: 'তার হাত ধরে ঘুরতে যাব।', isCorrect: false, icon: '🚶' }
+                ],
+                tip: 'অপরিচিত মানুষের দেওয়া কোনো খাবার বা উপহার নেওয়া এবং তাদের সাথে যাওয়া খুবই বিপজ্জনক।'
+            },
+            {
+                id: 18,
+                category: 'cat2',
+                categoryName: '🛡️ নিজের নিরাপত্তা ও আত্মরক্ষা',
+                emoji: '⚠️',
+                question: 'কেউ যদি তোমাকে বিপজ্জনক কোনো খেলা খেলতে বলে, তখন কী করবে?',
+                options: [
+                    { text: 'সাহস দেখানোর জন্য খেলব।', isCorrect: false, icon: '🤕' },
+                    { text: 'আমি বলব, এটা বিপজ্জনক। আমি খেলব না।', isCorrect: true, icon: '🛡️' },
+                    { text: 'সবাই খেলছে তাই আমিও খেলব।', isCorrect: false, icon: '🏃‍♂️' }
+                ],
+                tip: 'যে খেলায় ব্যথা পাওয়ার বা বিপদের ভয় থাকে, তা কখনোই খেলা উচিত নয়।'
+            },
+            {
+                id: 19,
+                category: 'cat2',
+                categoryName: '🛡️ নিজের নিরাপত্তা ও আত্মরক্ষা',
+                emoji: '🚭',
+                question: 'কেউ যদি তোমাকে সিগারেট বা ভেপ নিতে বলে, তখন কী করবে?',
+                options: [
+                    { text: 'আমি কখনো নেব না। এগুলো শরীরের জন্য ক্ষতিকর।', isCorrect: true, icon: '💪' },
+                    { text: 'দেখতে কেমন তা পরীক্ষা করে দেখব।', isCorrect: false, icon: '🤔' },
+                    { text: 'একবার নিয়ে দেখব।', isCorrect: false, icon: '❌' }
+                ],
+                tip: 'সিগারেট বা ভেপ স্বাস্থ্যের জন্য মারাত্মক ক্ষতিকর। এগুলোকে সব সময় দৃঢ়ভাবে না বলবে।'
+            },
+            {
+                id: 20,
+                category: 'cat2',
+                categoryName: '🛡️ নিজের নিরাপত্তা ও আত্মরক্ষা',
+                emoji: '💻',
+                question: 'কেউ যদি তোমাকে অনলাইনে অচেনা মানুষের সঙ্গে কথা বলতে বলে, তখন কী করবে?',
+                options: [
+                    { text: 'নতুন বন্ধু বানানোর জন্য কথা বলব ও ঠিকানা দেব।', isCorrect: false, icon: '📱' },
+                    { text: 'আমি মা-বাবার অনুমতি ছাড়া অপরিচিত কারও সঙ্গে কথা বলব না বা ব্যক্তিগত তথ্য দেব না।', isCorrect: true, icon: '🔒' },
+                    { text: 'নিজের ছবি পাঠিয়ে দেব।', isCorrect: false, icon: '📸' }
+                ],
+                tip: 'ইন্টারনেটে অচেনা মানুষকে কখনোই নিজের নাম, স্কুল বা বাসার ঠিকানা দেবে না।'
+            },
+
+            // --- ক্যাটাগরি ৩: আত্মবিশ্বাস ও ভালো অভ্যাস (প্রশ্ন ২১-৩০) ---
+            {
+                id: 21,
+                category: 'cat3',
+                categoryName: '🌟 আত্মবিশ্বাস ও ভালো অভ্যাস',
+                emoji: '🗣️',
+                question: 'কেউ তোমাকে অন্যায়ভাবে দোষ দিলে কী করবে?',
+                options: [
+                    { text: 'ভয় পেয়ে চুপচাপ দোষ মেনে নেব।', isCorrect: false, icon: '😞' },
+                    { text: 'আমি ভয় না পেয়ে সত্যি ঘটনা সুন্দরভাবে বুঝিয়ে বলব।', isCorrect: true, icon: '✨' },
+                    { text: 'রেগে গিয়ে চিৎকার করব।', isCorrect: false, icon: '😡' }
+                ],
+                tip: 'তুমি যদি সত্য হও, তবে শান্তভাবে ও সাহসের সাথে সত্যি ঘটনাটি বুঝিয়ে বলবে।'
+            },
+            {
+                id: 22,
+                category: 'cat3',
+                categoryName: '🌟 আত্মবিশ্বাস ও ভালো অভ্যাস',
+                emoji: '🤲',
+                question: 'কোনো বন্ধু বারবার তোমাকে কষ্ট দেয়, পরে ক্ষমা চায়, আবার একই কাজ করে—তখন কী করবে?',
+                options: [
+                    { text: 'আমি তাকে বুঝিয়ে বলব। তারপরও এমন করলে শিক্ষক বা মা-বাবার সাহায্য নেব।', isCorrect: true, icon: '👩‍🏫' },
+                    { text: 'প্রতিবারই চুপচাপ কষ্ট সহ্য করব।', isCorrect: false, icon: '😢' },
+                    { text: 'আমিও তাকে পাল্টা কষ্ট দেব।', isCorrect: false, icon: '😠' }
+                ],
+                tip: 'বারবার কষ্ট দেওয়া ভালো বন্ধুর লক্ষণ নয়। বড়দের সাহায্য নিলে সমস্যার সমাধান হবে।'
+            },
+            {
+                id: 23,
+                category: 'cat3',
+                categoryName: '🌟 আত্মবিশ্বাস ও ভালো অভ্যাস',
+                emoji: '🦸‍♂️',
+                question: 'বন্ধুরা তোমার সিদ্ধান্ত পছন্দ না করলে তুমি কী করবে?',
+                options: [
+                    { text: 'নিজের ভালো সিদ্ধান্ত বদলে ফেলব।', isCorrect: false, icon: '🔄' },
+                    { text: 'আমি সঠিক সিদ্ধান্তে অটল থাকব।', isCorrect: true, icon: '🏆' },
+                    { text: 'তাদের ভয়ে লুকিয়ে থাকব।', isCorrect: false, icon: '🙈' }
+                ],
+                tip: 'নিজের বিবেক ও মা-বাবার শেখানো সঠিক সিদ্ধান্তে অটল থাকাই প্রকৃত আত্মবিশ্বাস।'
+            },
+            {
+                id: 24,
+                category: 'cat3',
+                categoryName: '🌟 আত্মবিশ্বাস ও ভালো অভ্যাস',
+                emoji: '💐',
+                question: 'তুমি কোনো ভুল করলে কী করবে?',
+                options: [
+                    { text: 'ভুল লুকানোর জন্য মিথ্যা বলব।', isCorrect: false, icon: '🤥' },
+                    { text: 'অন্যের ঘাড়ে দোষ চাপিয়ে দেব।', isCorrect: false, icon: '👉' },
+                    { text: 'আমি ভুল স্বীকার করব, ক্ষমা চাইব এবং আবার সেই ভুল না করার চেষ্টা করব।', isCorrect: true, icon: '💖' }
+                ],
+                tip: 'মানুষ মাত্রই ভুল হতে পারে। ভুল স্বীকার করে ক্ষমা চাওয়া অনেক বড় গুণের পরিচয়।'
+            },
+            {
+                id: 25,
+                category: 'cat3',
+                categoryName: '🌟 আত্মবিশ্বাস ও ভালো অভ্যাস',
+                emoji: '🤝',
+                question: 'কোনো বন্ধু তোমার কাছে সাহায্য চাইলে কী করবে?',
+                options: [
+                    { text: 'আমি সাধ্য অনুযায়ী তাকে সাহায্য করব।', isCorrect: true, icon: '🌟' },
+                    { text: 'না শোনার ভান করে চলে যাব।', isCorrect: false, icon: '🚶' },
+                    { text: 'তাকে নিয়ে হাসাহাসি করব।', isCorrect: false, icon: '😆' }
+                ],
+                tip: 'অন্যকে সাহায্য করলে নিজের মনও আনন্দে ভরে ওঠে এবং ভালো বন্ধু তৈরি হয়।'
+            },
+            {
+                id: 26,
+                category: 'cat3',
+                categoryName: '🌟 আত্মবিশ্বাস ও ভালো অভ্যাস',
+                emoji: '🛑',
+                question: 'কেউ তোমাকে খারাপ নামে ডাকলে কী করবে?',
+                options: [
+                    { text: 'আমিও তাকে খারাপ নামে ডাকব।', isCorrect: false, icon: '😝' },
+                    { text: 'আমি বলব, আমাকে এভাবে ডাকবে না। প্রয়োজনে শিক্ষককে জানাব।', isCorrect: true, icon: '👩‍🏫' },
+                    { text: 'কিছু না বলে মন খারাপ করে থাকব।', isCorrect: false, icon: '😔' }
+                ],
+                tip: 'সবারই সুন্দর নাম আছে। কেউ খারাপ নামে ডাকলে দৃঢ়ভাবে নিষেধ করবে।'
+            },
+            {
+                id: 27,
+                category: 'cat3',
+                categoryName: '🌟 আত্মবিশ্বাস ও ভালো অভ্যাস',
+                emoji: '🌻',
+                question: 'তোমার কোনো বন্ধু একা বসে থাকলে কী করবে?',
+                options: [
+                    { text: 'আমি তার কাছে যাব এবং একসঙ্গে খেলতে চাইব।', isCorrect: true, icon: '🎈' },
+                    { text: 'তাকে একা বসে থাকতে দেব।', isCorrect: false, icon: '🪑' },
+                    { text: 'দূর থেকে তাকিয়ে থাকব।', isCorrect: false, icon: '👀' }
+                ],
+                tip: 'একা থাকা বন্ধুর পাশে গিয়ে কথা বললে সে অনেক খুশি হবে এবং তোমার ভালো বন্ধু হয়ে উঠবে।'
+            },
+            {
+                id: 28,
+                category: 'cat3',
+                categoryName: '🌟 আত্মবিশ্বাস ও ভালো অভ্যাস',
+                emoji: '🏫',
+                question: 'স্কুলে কোনো সমস্যা হলে কার কাছে সাহায্য চাইবে?',
+                options: [
+                    { text: 'অপরিচিত কোনো পথচারীর কাছে।', isCorrect: false, icon: '🚶‍♂️' },
+                    { text: 'শিক্ষক, মা-বাবা অথবা স্কুলের বিশ্বস্ত বড় মানুষের কাছে সাহায্য চাইব।', isCorrect: true, icon: '👨‍👩‍👧' },
+                    { text: 'কাউকে না বলে লুকিয়ে রাখব।', isCorrect: false, icon: '🤐' }
+                ],
+                tip: 'স্কুলে শিক্ষক এবং বাসায় মা-বাবাই তোমার সবচেয়ে বড় বন্ধু ও পথপ্রদর্শক।'
+            },
+            {
+                id: 29,
+                category: 'cat3',
+                categoryName: '🌟 আত্মবিশ্বাস ও ভালো অভ্যাস',
+                emoji: '🙅‍♀️',
+                question: 'কেউ তোমাকে এমন কিছু করতে বললে, যেটা তোমার অস্বস্তি লাগে, তখন কী বলবে?',
+                options: [
+                    { text: 'আমি বলব, না। আমি এটা করতে চাই না।', isCorrect: true, icon: '🛡️' },
+                    { text: 'অস্বস্তি লাগলেও চুপচাপ করব।', isCorrect: false, icon: '😟' },
+                    { text: 'লজ্জায় কিছু বলতে পারব না।', isCorrect: false, icon: '😶' }
+                ],
+                tip: 'তোমার মনের অনুভূতি খুব গুরুত্বপূর্ণ। অস্বস্তি লাগলে সাথে সাথে না বলবে।'
+            },
+            {
+                id: 30,
+                category: 'cat3',
+                categoryName: '🌟 আত্মবিশ্বাস ও ভালো অভ্যাস',
+                emoji: '❤️',
+                question: 'স্কুলে কেউ তোমাকে ভয় দেখালে বা কষ্ট দিলে মা-বাবাকে বলবে কি?',
+                options: [
+                    { text: 'না, বললে মা-বাবা বকা দেবেন।', isCorrect: false, icon: '😨' },
+                    { text: 'অবশ্যই বলব। কারণ মা-বাবা আমাকে ভালোবাসেন এবং আমার নিরাপত্তার জন্য সাহায্য করবেন।', isCorrect: true, icon: '🏡' },
+                    { text: 'কখনোই বলব না।', isCorrect: false, icon: '🙊' }
+                ],
+                tip: 'মা-বাবা তোমাকে পৃথিবীর সবচেয়ে বেশি ভালোবাসেন। সব কথা তাঁদের নির্ভয়ে বলবে।'
+            }
+        ];
+
+        // =========================================================================
+        // 2. APP STATE & AUDIO / SPEECH ENGINES
+        // =========================================================================
+        let state = {
+            mode: 'cat1',
+            questions: [],
+            currentIndex: 0,
+            score: 0,
+            correctCount: 0,
+            answered: false,
+            soundEnabled: true,
+            voiceEnabled: true
+        };
+
+        // Web Audio API Context (No external sound files needed!)
+        let audioCtx = null;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        // Play Sweet Happy Chime for Correct Answer
+        function playCorrectSound() {
+            if (!state.soundEnabled) return;
+            try {
+                initAudio();
+                const now = audioCtx.currentTime;
+                const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+                notes.forEach((freq, idx) => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, now + idx * 0.09);
+                    
+                    gain.gain.setValueAtTime(0.01, now + idx * 0.09);
+                    gain.gain.exponentialRampToValueAtTime(0.25, now + idx * 0.09 + 0.03);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.09 + 0.35);
+
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(now + idx * 0.09);
+                    osc.stop(now + idx * 0.09 + 0.36);
+                });
+            } catch (e) {
+                console.warn('Audio playback skipped:', e);
+            }
+        }
+
+        // Play Gentle "Try Again" Sound for Wrong Answer
+        function playWrongSound() {
+            if (!state.soundEnabled) return;
+            try {
+                initAudio();
+                const now = audioCtx.currentTime;
+                const notes = [330, 277.18]; // E4 -> C#4 gentle descending tone
+                notes.forEach((freq, idx) => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(freq, now + idx * 0.16);
+
+                    gain.gain.setValueAtTime(0.01, now + idx * 0.16);
+                    gain.gain.exponentialRampToValueAtTime(0.2, now + idx * 0.16 + 0.04);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.16 + 0.35);
+
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(now + idx * 0.16);
+                    osc.stop(now + idx * 0.16 + 0.36);
+                });
+            } catch (e) {
+                console.warn('Audio playback skipped:', e);
+            }
+        }
+
+        // Play Celebration Fanfare on Result Screen
+        function playCelebrationSound() {
+            if (!state.soundEnabled) return;
+            try {
+                initAudio();
+                const now = audioCtx.currentTime;
+                const melody = [
+                    { f: 523.25, t: 0, d: 0.15 },
+                    { f: 659.25, t: 0.15, d: 0.15 },
+                    { f: 783.99, t: 0.30, d: 0.15 },
+                    { f: 1046.50, t: 0.45, d: 0.4 },
+                    { f: 783.99, t: 0.75, d: 0.15 },
+                    { f: 1046.50, t: 0.90, d: 0.5 }
+                ];
+                melody.forEach(n => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(n.f, now + n.t);
+                    gain.gain.setValueAtTime(0.22, now + n.t);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + n.t + n.d);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(now + n.t);
+                    osc.stop(now + n.t + n.d + 0.05);
+                });
+            } catch (e) {}
+        }
+
+        // Bengali Speech Synthesis (Web Speech API)
+        function speakBengali(text) {
+            if (!state.voiceEnabled || !('speechSynthesis' in window)) return;
+            try {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                const voices = window.speechSynthesis.getVoices();
+                // Prefer Bengali voice (bn-BD or bn-IN)
+                const bnVoice = voices.find(v => v.lang.includes('bn-BD')) ||
+                                voices.find(v => v.lang.includes('bn')) ||
+                                voices.find(v => v.name.toLowerCase().includes('bengali'));
+                if (bnVoice) {
+                    utterance.voice = bnVoice;
+                }
+                utterance.lang = 'bn-BD';
+                utterance.rate = 0.95; // Slightly slower & clearer for kids
+                utterance.pitch = 1.1; // Friendly cheerful pitch
+                window.speechSynthesis.speak(utterance);
+            } catch (e) {
+                console.warn('Speech synthesis error:', e);
+            }
+        }
+
+        // Ensure voices load asynchronously on Chrome/Android
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.onvoiceschanged = () => {
+                window.speechSynthesis.getVoices();
+            };
+        }
+
+        function toggleSound() {
+            state.soundEnabled = !state.soundEnabled;
+            const icon = document.getElementById('icon-sound');
+            const btn = document.getElementById('btn-sound');
+            if (state.soundEnabled) {
+                icon.textContent = '🔊';
+                btn.classList.remove('opacity-60');
+                playCorrectSound();
+            } else {
+                icon.textContent = '🔇';
+                btn.classList.add('opacity-60');
+            }
+        }
+
+        function toggleVoice() {
+            state.voiceEnabled = !state.voiceEnabled;
+            const icon = document.getElementById('icon-voice');
+            const btn = document.getElementById('btn-voice');
+            if (state.voiceEnabled) {
+                icon.textContent = '🗣️';
+                btn.classList.remove('opacity-60');
+                speakBengali('ভয়েস চালু হয়েছে');
+            } else {
+                icon.textContent = '🤐';
+                btn.classList.add('opacity-60');
+                if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+            }
+        }
+
+        // =========================================================================
+        // 3. CONFETTI ANIMATION ENGINE
+        // =========================================================================
+        const confettiCanvas = document.getElementById('confetti-canvas');
+        const ctx = confettiCanvas.getContext('2d');
+        let confettiParticles = [];
+        let confettiAnimId = null;
+
+        function resizeCanvas() {
+            confettiCanvas.width = window.innerWidth;
+            confettiCanvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        function launchConfetti(count = 90) {
+            const colors = ['#FF595E', '#FFCA3A', '#8AC926', '#1982C4', '#6A4C93', '#FF70A6', '#00F5D4'];
+            for (let i = 0; i < count; i++) {
+                confettiParticles.push({
+                    x: Math.random() * confettiCanvas.width,
+                    y: Math.random() * confettiCanvas.height * 0.4 - 50,
+                    size: Math.random() * 10 + 6,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    speedX: (Math.random() - 0.5) * 6,
+                    speedY: Math.random() * 4 + 3,
+                    rotation: Math.random() * 360,
+                    rotationSpeed: (Math.random() - 0.5) * 10,
+                    shape: Math.random() > 0.5 ? 'rect' : 'circle'
+                });
+            }
+            if (!confettiAnimId) {
+                animateConfetti();
+            }
+        }
+
+        function animateConfetti() {
+            ctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+            confettiParticles.forEach((p, index) => {
+                p.x += p.speedX;
+                p.y += p.speedY;
+                p.rotation += p.rotationSpeed;
+                p.speedY += 0.08; // gravity
+
+                ctx.save();
+                ctx.translate(p.x, p.y);
+                ctx.rotate((p.rotation * Math.PI) / 180);
+                ctx.fillStyle = p.color;
+                if (p.shape === 'rect') {
+                    ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.6);
+                } else {
+                    ctx.beginPath();
+                    ctx.arc(0, 0, p.size / 2, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                ctx.restore();
+
+                if (p.y > confettiCanvas.height + 20) {
+                    confettiParticles.splice(index, 1);
+                }
+            });
+
+            if (confettiParticles.length > 0) {
+                confettiAnimId = requestAnimationFrame(animateConfetti);
+            } else {
+                confettiAnimId = null;
+            }
+        }
+
+        // =========================================================================
+        // 4. QUIZ LOGIC & VIEW MANAGEMENT
+        // =========================================================================
+        function shuffleArray(array) {
+            const arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        function switchView(viewId) {
+            ['view-home', 'view-quiz', 'view-result'].forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
+            const target = document.getElementById(viewId);
+            target.classList.remove('hidden');
+            target.classList.remove('animate-pop');
+            void target.offsetWidth; // trigger reflow for animation
+            target.classList.add('animate-pop');
+        }
+
+        function goHome() {
+            if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+            switchView('view-home');
+        }
+
+        function startQuiz(mode) {
+            initAudio();
+            state.mode = mode;
+            state.currentIndex = 0;
+            state.score = 0;
+            state.correctCount = 0;
+            state.answered = false;
+
+            if (mode === 'cat1' || mode === 'cat2' || mode === 'cat3') {
+                state.questions = quizData.filter(q => q.category === mode);
+            } else if (mode === 'mix10') {
+                state.questions = shuffleArray(quizData).slice(0, 10);
+            } else if (mode === 'mix15') {
+                state.questions = shuffleArray(quizData).slice(0, 15);
+            } else if (mode === 'all30') {
+                state.questions = [...quizData];
+            }
+
+            switchView('view-quiz');
+            renderQuestion();
+        }
+
+        function replayQuiz() {
+            startQuiz(state.mode);
+        }
+
+        function renderQuestion() {
+            state.answered = false;
+            const q = state.questions[state.currentIndex];
+            const total = state.questions.length;
+
+            // Update Header Info
+            document.getElementById('quiz-category-badge').textContent = q.categoryName;
+            document.getElementById('current-score').textContent = state.score;
+            document.getElementById('question-counter').textContent = `${state.currentIndex + 1}/${total}`;
+            
+            const progressPercent = ((state.currentIndex) / total) * 100;
+            document.getElementById('progress-bar').style.width = `${Math.max(5, progressPercent)}%`;
+
+            // Update Question Text & Emoji
+            document.getElementById('question-emoji').textContent = q.emoji;
+            document.getElementById('question-text').textContent = q.question;
+
+            // Hide Feedback Box
+            const feedbackBox = document.getElementById('feedback-box');
+            feedbackBox.classList.add('hidden');
+
+            // Render Shuffled Options
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = '';
+
+            const shuffledOptions = shuffleArray(q.options);
+            const optionLabels = ['ক', 'খ', 'গ', 'ঘ'];
+
+            shuffledOptions.forEach((opt, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-card w-full text-left bg-slate-50 hover:bg-indigo-50 border-2 border-slate-200 rounded-2xl p-4 sm:p-5 flex items-center gap-3.5 sm:gap-4 cursor-pointer';
+                btn.dataset.correct = opt.isCorrect;
+                btn.dataset.text = opt.text;
+
+                btn.innerHTML = `
+                    <span class="w-10 h-10 sm:w-12 sm:h-12 shrink-0 rounded-xl bg-indigo-100 text-indigo-700 font-bold text-lg sm:text-xl flex items-center justify-center">
+                        ${optionLabels[index]}
+                    </span>
+                    <span class="text-2xl sm:text-3xl shrink-0">${opt.icon}</span>
+                    <span class="text-base sm:text-xl font-semibold text-slate-800 leading-snug flex-grow">
+                        ${opt.text}
+                    </span>
+                    <span class="status-icon text-2xl shrink-0"></span>
+                `;
+
+                btn.onclick = () => handleAnswer(btn, opt.isCorrect, q);
+                optionsContainer.appendChild(btn);
+            });
+
+            // Update Next Button Text if Last Question
+            const nextBtn = document.getElementById('btn-next');
+            if (state.currentIndex === total - 1) {
+                nextBtn.innerHTML = `<span>ফলাফল দেখো</span><span>🏆</span>`;
+            } else {
+                nextBtn.innerHTML = `<span>পরবর্তী প্রশ্ন</span><span>➡️</span>`;
+            }
+
+            // Read Question Aloud in Bengali
+            speakBengali(q.question);
+        }
+
+        function speakCurrentQuestion() {
+            const q = state.questions[state.currentIndex];
+            if (q) speakBengali(q.question);
+        }
+
+        const happyPhrases = [
+            'সাবাশ! দারুণ বলেছো!',
+            'চমৎকার হয়েছে! তুমি খুব বুদ্ধিমান!',
+            'অসাধারণ! একদম সঠিক উত্তর!',
+            'বাহ! খুব সুন্দর উত্তর দিয়েছো!'
+        ];
+
+        const encouragePhrases = [
+            'আবার চেষ্টা করো! সঠিক উত্তরটি দেখে নাও।',
+            'কোনো ব্যাপার না! চলো সঠিক উত্তরটি শিখে নিই।',
+            'মন খারাপ করো না, পরের বার ঠিক পারবে!'
+        ];
+
+        function handleAnswer(selectedBtn, isCorrect, questionObj) {
+            if (state.answered) return;
+            state.answered = true;
+
+            const allButtons = document.querySelectorAll('#options-container button');
+            const feedbackBox = document.getElementById('feedback-box');
+            const feedbackEmoji = document.getElementById('feedback-emoji');
+            const feedbackTitle = document.getElementById('feedback-title');
+            const feedbackMessage = document.getElementById('feedback-message');
+
+            // Disable all buttons and reveal correct answer
+            allButtons.forEach(btn => {
+                btn.disabled = true;
+                btn.classList.remove('hover:bg-indigo-50');
+                const btnIsCorrect = btn.dataset.correct === 'true';
+                const statusIcon = btn.querySelector('.status-icon');
+
+                if (btnIsCorrect) {
+                    btn.classList.remove('bg-slate-50', 'border-slate-200');
+                    btn.classList.add('bg-emerald-100', 'border-emerald-500', 'ring-2', 'ring-emerald-400');
+                    statusIcon.textContent = '✅';
+                }
+            });
+
+            if (isCorrect) {
+                state.score += 10;
+                state.correctCount += 1;
+                document.getElementById('current-score').textContent = state.score;
+
+                playCorrectSound();
+                launchConfetti(80);
+
+                const praise = happyPhrases[Math.floor(Math.random() * happyPhrases.length)];
+                feedbackBox.className = 'mt-6 rounded-2xl p-5 border-2 bg-emerald-50 border-emerald-400 text-emerald-900 animate-pop';
+                feedbackEmoji.textContent = '🎉';
+                feedbackTitle.textContent = praise;
+                feedbackMessage.textContent = `💡 মনে রেখো: ${questionObj.tip}`;
+
+                speakBengali(`${praise} ${questionObj.tip}`);
+            } else {
+                selectedBtn.classList.remove('bg-slate-50', 'border-slate-200');
+                selectedBtn.classList.add('bg-rose-100', 'border-rose-500', 'animate-shake');
+                selectedBtn.querySelector('.status-icon').textContent = '❌';
+
+                playWrongSound();
+
+                const correctAnswerObj = questionObj.options.find(o => o.isCorrect);
+                const encourage = encouragePhrases[Math.floor(Math.random() * encouragePhrases.length)];
+                
+                feedbackBox.className = 'mt-6 rounded-2xl p-5 border-2 bg-amber-50 border-amber-400 text-amber-950 animate-pop';
+                feedbackEmoji.textContent = '🤗';
+                feedbackTitle.textContent = encourage;
+                feedbackMessage.innerHTML = `✅ <strong>সঠিক উত্তর:</strong> ${correctAnswerObj.text} <br><span class="text-sm mt-1 inline-block">💡 ${questionObj.tip}</span>`;
+
+                speakBengali(`${encourage} সঠিক উত্তর হলো: ${correctAnswerObj.text}`);
+            }
+
+            feedbackBox.classList.remove('hidden');
+            
+            // Update progress bar to include completed question
+            const progressPercent = ((state.currentIndex + 1) / state.questions.length) * 100;
+            document.getElementById('progress-bar').style.width = `${progressPercent}%`;
+        }
+
+        function nextQuestion() {
+            if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+            if (state.currentIndex + 1 < state.questions.length) {
+                state.currentIndex++;
+                renderQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            switchView('view-result');
+            playCelebrationSound();
+            launchConfetti(140);
+
+            const total = state.questions.length;
+            const correct = state.correctCount;
+            const percentage = (correct / total) * 100;
+
+            document.getElementById('res-total').textContent = toBengaliNumber(total);
+            document.getElementById('res-correct').textContent = toBengaliNumber(correct);
+            document.getElementById('res-points').textContent = toBengaliNumber(state.score);
+
+            // Calculate 1 to 5 Stars
+            let starsCount = 1;
+            if (percentage >= 90) starsCount = 5;
+            else if (percentage >= 75) starsCount = 4;
+            else if (percentage >= 50) starsCount = 3;
+            else if (percentage >= 25) starsCount = 2;
+            else starsCount = 1;
+
+            const starsContainer = document.getElementById('stars-container');
+            starsContainer.innerHTML = '';
+            for (let i = 1; i <= 5; i++) {
+                const starSpan = document.createElement('span');
+                starSpan.style.animationDelay = `${i * 0.15}s`;
+                if (i <= starsCount) {
+                    starSpan.textContent = '⭐';
+                    starSpan.className = 'star-animate drop-shadow-md';
+                } else {
+                    starSpan.textContent = '☆';
+                    starSpan.className = 'text-slate-300';
+                }
+                starsContainer.appendChild(starSpan);
+            }
+
+            // Badge & Encouraging Message
+            const badgeEmoji = document.getElementById('result-badge-emoji');
+            const badgeTitle = document.getElementById('result-badge-title');
+            const heading = document.getElementById('result-heading');
+            const subtext = document.getElementById('result-subtext');
+
+            if (starsCount === 5) {
+                badgeEmoji.textContent = '👑';
+                badgeTitle.textContent = 'সুপার হিরো চ্যাম্পিয়ন!';
+                heading.textContent = 'অসাধারণ! তুমি ৫টি তারাই জিতেছো!';
+                subtext.textContent = 'তুমি খুব সাহসী, বুদ্ধিমান এবং নিজের নিরাপত্তা সম্পর্কে দারুণ সচেতন!';
+            } else if (starsCount >= 3) {
+                badgeEmoji.textContent = '🏅';
+                badgeTitle.textContent = 'সাহসী ও বুদ্ধিমান বন্ধু!';
+                heading.textContent = 'সাবাশ! খুব সুন্দর খেলেছো!';
+                subtext.textContent = 'তুমি অনেকগুলো সঠিক উত্তর দিয়েছো। আরেকবার খেললে সবগুলোই পারবে!';
+            } else {
+                badgeEmoji.textContent = '🌟';
+                badgeTitle.textContent = 'উদীয়মান ছোট্ট তারকা!';
+                heading.textContent = 'দারুণ চেষ্টা করেছো!';
+                subtext.textContent = 'খেলতে খেলতেই আমরা শিখি। চলো আরেকবার খেলে সব উত্তর শিখে নিই!';
+            }
+
+            speakBengali(`${heading.textContent} তুমি ${toBengaliNumber(total)}টি প্রশ্নের মধ্যে ${toBengaliNumber(correct)}টি সঠিক উত্তর দিয়েছো!`);
+        }
+
+        function toBengaliNumber(num) {
+            const bnDigits = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
+            return num.toString().split('').map(d => bnDigits[d] || d).join('');
+        }
+
+        // =========================================================================
+        // 5. PARENTS MODAL CONTROLS
+        // =========================================================================
+        function openParentsModal() {
+            document.getElementById('parents-modal').classList.remove('hidden');
+        }
+
+        function closeParentsModal() {
+            document.getElementById('parents-modal').classList.add('hidden');
+        }
+
+        // Close modal on outside click
+        document.getElementById('parents-modal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeParentsModal();
+            }
+        });
+    </script>
+</body>
+</html>
